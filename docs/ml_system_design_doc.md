@@ -30,9 +30,13 @@ This project belongs to **research projects**. The expected results of all the w
 
 **Business Purpose:**
 
+- Increase customer conversion and retention by instantly adapting to their mood and preferences.
+- Save money by reducing the need for computing resources.
+
+<!--
 - Develop a model that is less demanding in terms of both time training and memory requirements of the algorithm for **online training** implementation, in order to reduce resource consumption during system maintenance. Most modern research focuses on offline training, so this is a significant improvement.
 - To increase customer satisfaction by ensuring recommendations do not degrade by more than 15% in Recall@k and NDCG@k metrics, or by improving their quality on datasets (specific figures and datasets will be provided after the domain selection phase, with a deadline of December 8).
-- Short-Term Goals: identify and outline challenges with existing SOTA GNN algorithms.
+- Short-Term Goals: identify and outline challenges with existing SOTA GNN algorithms. -->
 
 **Why will it get better than it is now from using ML:**
 Classic recommender systems usually handle negative feedback only in the loss for better classification, ranking, or rating prediction. At the same time, information that the user is not interested in is very useful and reduces the risk of unwanted items. In addition, the training/retraining process typically occurs offline and on a periodic basis. This means that users' interests are updated only once per iteration of the retraining process, which can lead to decreased user satisfaction and significant resource costs.
@@ -71,7 +75,7 @@ The goal of the project is to create a system of recommendations that:
   2. Step 2 (v0.2.0): Launching open-source approaches on selected datasets, summarizing the results of the study, and launching to fix requirements for the final goal. Hypotheses for improving models. The versions of documents differ in terms of additions to the progress of project introduction and implementation of open-source approaches for selected datasets.
   3. Step 3 (v1.0.0): Implementation of hypotheses and conducting experiments. Selection of best hypotheses and a new iteration of hypotheses. Versions differ in accuracy, with sub-versions focusing on convenience and stability.
   4. Step 4 (v2.0.0): Preparation of the article. Consideration of A/B testing options. Presentation of results.
-- **Data:** Currently selecting domain, with suggested current solution being music recommendation. Datasets: [LastFM](http://www.millionsongdataset.com/lastfm/), [SberZvuk](https://www.kaggle.com/datasets/alexxl/zvuk-dataset).
+- **Data:** Selected domains: music recommendation, short-video recomendation. Datasets: [SberZvuk](https://www.kaggle.com/datasets/alexxl/zvuk-dataset), [KuaiRand](https://kuairand.com/). The version of the datasets is not final. When preparing the MVP and beating the baseline, our model plans to expand the list of datasets.
 - **Performers:** Sidorova Anna <<anna.pav.sidorova@gmail.com>>, Tishin Roman < empty >.
 
 ##### 1.2.3. Business requirements and restrictions for the pilot [at the approval stage]
@@ -189,4 +193,4 @@ Creation of a recommendation system with the possibility of online training.
 
 #### 2.2. The block diagram of the solution
 
-![The block diagram of the solution](https://github.com/Laitielly/gnn-recommender/blob/main/imgs/block-scheme.png)
+![The block diagram of the solution](../imgs/block-scheme.png)
