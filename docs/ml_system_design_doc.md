@@ -1,6 +1,6 @@
 # ML System Design Doc - [En]
 
-## ML System Design - \<Graph-based recommender systems with explicit negative feedback encoding\> \<MVP\> \<0.1.0\>
+## ML System Design - \<Graph-based recommender systems with explicit negative feedback encoding\> \<MVP\> \<0.1.1\>
 
 This project belongs to **research projects**. The expected results of all the work will be **an article** describing the proposed approach and the implementation of **mvp** in the form of an algorithm.
 
@@ -22,7 +22,6 @@ This project belongs to **research projects**. The expected results of all the w
 > - Embedding - mathematical representation of graph nodes in the form of dense vectors that are used in models to generate recommendations.
 > - Recall@k - a metric that measures the proportion of relevant items in the set of recommended items.
 > - NDCG (Normalized Discounted Cumulative Gain) - a metric used to evaluate the quality of a ranking algorithm by measuring how well relevant items are positioned at the top of the recommendation list.
-
 
 ### 1. Goals and prerequisites
 
@@ -194,3 +193,272 @@ Creation of a recommendation system with the possibility of online training.
 #### 2.2. The block diagram of the solution
 
 ![The block diagram of the solution](../imgs/block-scheme.png)
+
+#### 2.3. The stages of problem solving
+
+##### Stage 1. Data preparation
+
+- **Step 1. Data collection, feature selection, analysis.**
+  Download the data from the following sites: [SberZvuk](https://www.kaggle.com/datasets/alexxl/zvuk-dataset), [KuaiRand](https://kuairand.com/). We upload them to Jupiter's notebook. When selecting, we check the completeness of the data, the presence of missing values, and make a description of the presented features. As a result, we get an initial representation of the data.
+
+  For further work with the data, we will need to come up with a feedback processing algorithm, that is, turn the implicit feedback into an explicit one.
+
+1. [SberZvuk](https://www.kaggle.com/datasets/alexxl/zvuk-dataset)
+
+**The target variable:**
+
+| The name of the data | Does the company have data (if so, the name of the source/storefronts) | Required resource for data acquisition (which roles are needed) | Has the data quality been checked (yes, no) |
+|----------|----------|----------|----------|
+| Play duration | zvuk-interactions.parquet/platform log | DE | + |
+
+**Features:**
+
+| The name of the data | Does the company have data (if so, the name of the source/storefronts) | Required resource for data acquisition (which roles are needed) | Has the data quality been checked (yes, no) |
+|----------|----------|----------|----------|
+| User ID | zvuk-interactions.parquet / values stored in the database | DE | + |
+| User sessions with interactions | zvuk-interactions.parquet / platform log | DE | + |
+| Datetime of interactions | zvuk-interactions.parquet / platform log | DE | - |
+| Tracks ID | zvuk-interactions.parquet / values stored in the database | DE | + |
+| Artist ID | zvuk-track_artist_embedding.parquet / values stored in the database | DE | - |
+| Clustert of track ID | zvuk-track_artist_embedding.parquet / from the system or using the clustering model | DS | - |
+| Embedding of track ID | zvuk-track_artist_embedding.parquet /  | DS | + |
+
+**Possible challenges:** this dataset lacks explicit feedback, which poses difficulties in constructing the system. In order to address this issue, preprocessing is required, allowing for the extraction of implicit negative/positive feedback to explicit feedback with a certain degree of inaccuracy. For instance, a threshold accounting of the number of auditions can be used, along with information regarding the duration of each audition.
+
+2. [KuaiRand](https://kuairand.com/)
+
+Due to the large number of entities, they were grouped. For more information, see the link above.
+
+**The target variable:**
+
+| The name of the data | Does the company have data (if so, the name of the source/storefronts) | Required resource for data acquisition (which roles are needed) | Has the data quality been checked (yes, no) |
+|----------|----------|----------|----------|
+| Engagement | log_random_4_22_to_5_08.csv / log_standard_4_22_to_5_08.csv / log_standard_4_08_to_4_21.csv / logs from app | DE | + |
+
+**Features:**
+
+| The name of the data | Does the company have data (if so, the name of the source/storefronts) | Required resource for data acquisition (which roles are needed) | Has the data quality been checked (yes, no) |
+|----------|----------|----------|----------|
+| IDs (user/video/author/music) | log_random_4_22_to_5_08.csv / log_standard_4_22_to_5_08.csv / log_standard_4_08_to_4_21.csv / video_features_basic.csv / logs from app | DE | + |
+| User's feedback (click/dislike/comment/etc) | log_random_4_22_to_5_08.csv / log_standard_4_22_to_5_08.csv / log_standard_4_08_to_4_21.csv / video_features_basic.csv / logs from app | DE | - |
+| User's profile info | user_features.csv / info from app | DE | - |
+| User's features | user_features.csv / info from app | DS | - |
+| Basic video features | video_features_basic.csv / logs from app | DE | - |
+| Video statistics | video_features_statistic.csv / logs from app | DE | - |
+
+**MVP:** Jupiter's notebook with loaded attributes. Notebooks located in [eda folder](../eda), to select a domain, a [document](../research_documents/AIRI_datasets_research.pdf) describing existing datasets with links, a description, and pros and cons is also available.
+
+- **Step 2: Data processing and preparation for training.**
+In this step, we clean the data by removing outliers (a small number of interactions) and fill missing values for KuaiRand. KuaiRand also requaries feature engineering step. For data with no explicit feedback, we create a preprocessing function to separate implicit and explicit feedback. For each user, their interactions are divided into four categories: explicit positive, implicit positive, explicit negative, and implicit negative.
+The description of the sample creation for training, testing, and validation is as follows: all user interactions serve as the basis for the data, which are then divided into these four categories. The data is divided into subsamples according to a time frame specified in the dataset. Most of the older data is used for training per user, while the newer data is reserved for validation and testing purposes.
+
+**MVP:** The data that has been prepared for model and baseline building.
+
+**Sum:**
+
+- As the project is primarily a research initiative, the data has been sourced from open-source repositories and is already in the form of CSV or Parquet tables.
+- No additional data generation is required.
+- It should be noted that the selected dataset is quite extensive, large computing resources are required.
+- There is confidential information, but it has already been encrypted by the creators of the original dataset.
+- There is an imbalance in the negative feedback within the datasets, which must be considered when constructing a system.
+- In a real-world setting, data will originate from the service and each user interaction will be recorded in the database. For off-line learning, the database will aggregate interactions and ultimately be employed for retraining. For online learning, in addition to storing data, it will be immediately incorporated into the model.
+
+##### Stage 2. Preparation of predictive models
+
+- **Step 3: Exploring current approaches to selecting a baseline model.**
+  At this step, we explore the current state-of-the-art algorithms in the field of *Graph-based recommender systems with explicit negative feedback encoding*. The research has been conducted and is available at [this link](../research_documents/AIRI_research.pdf).
+
+  At this stage, general approaches are identified, problems are highlighted, and open methods are sought for launching the baseline.
+
+  **Identified limitations** (briefly; more details can be found in the presentation):
+  - High Computational Complexity
+    - Scalability Challenges for Real-World Applications
+    - Trade-Offs in Resource Allocation
+    - Impracticality of Online Learning
+  - Prediction Smoothing
+  - Accounting for All Negative Interactions
+    - Imbalance-Induced Overfitting
+    - Noise in Negative Interactions
+    - Lack of Hierarchical Handling of Negatives
+  - Static Graph Assumption
+    - Inability to Handle Temporal Dynamics
+    - Over-Reliance on Offline Training
+
+  Identified open source solutions:
+
+| Approach | github link |
+|----------|----------|
+| [NFARec](https://ar5iv.labs.arxiv.org/html/2404.06900) | [link](https://github.com/WangXFng/NFARec) |
+| [TGT](https://paperswithcode.com/paper/multi-behavior-sequential-recommendation-with) | [link](https://github.com/akaxlh/tgt) |
+| [KGUF](https://arxiv.org/pdf/2403.20095v1) | [link](https://github.com/sisinflab/KGUF) |
+| [RNS over KG](https://paperswithcode.com/paper/reinforced-negative-sampling-over-knowledge) | [link](https://github.com/xiangwang1223/kgpolicy) |
+| [RevGNN](https://arxiv.org/pdf/2407.20684) | [link](https://github.com/THUDM/Reviewer-Rec) |
+| [SBNR](https://arxiv.org/abs/2205.06058) | [link](https://github.com/summmeer/session-based-news-recommendation) |
+| [SIGformer](https://arxiv.org/pdf/2404.11982) | [link](https://github.com/StupidThree/SIGformer) |
+| [AGL-SC](https://arxiv.org/html/2406.18984v2) | [link](https://github.com/yp8976/AGL_SC) |
+| [MacGNN](https://paperswithcode.com/paper/macro-graph-neural-networks-for-online) | [link](https://github.com/YuanchenBei/MacGNN) |
+
+**MVP:** [Document](../research_documents/AIRI_research.pdf) with research and conclusions.
+
+- **Step 4: Selecting and launching a baseline model.**
+  From the list of models identified in **Step 3**, a baseline model should be selected. The main selection criteria include: high metrics on datasets, simplicity of implementation, available computational resources, and configured versions of the libraries in use. The following methods meet these criteria:
+
+  - [NFARec](https://ar5iv.labs.arxiv.org/html/2404.06900): Takes negative feedback into account to improve recommendations. Utilizes hypergraph convolutions and the Transformer Hawkes Process to analyze temporal dynamics.
+
+   ![Architecture of NFARec framework. NFARec learns negative feedback in both sequential and structural patterns.](../imgs/NFARec_arch.png)
+   \[
+   \mathcal{L}_{main} = \sum_{(u \in \mathcal{U})} \sum_{(i \in \mathcal{I})} c_{u, i} \cdot \gamma_i^{(u)} \log(\alpha_4(\hat{R}_{u, i})),
+   \]
+   where:
+  - \(\gamma^{(u)} \in \mathbb{R}^{|\mathcal{I}|}\) represents a label vector, in which each element equals 1 if the corresponding item is a ground-truth candidate; otherwise, 0.
+  - \(\alpha_4\) denotes the sigmoid activation function.
+  - \(c_{u, i}\) is set to: \(\beta_1\) when the user has interacted with the item, \(\beta_2\) when the user will interact with the item, and 0 otherwise.
+  - \(\hat{R}_{u, i}\) is the predicted score for user \(u\) and item \(i\).
+   \[
+   \mathcal{L}_{auxi} = \sum_{(u \in \mathcal{U})} \left( \sum_{j=1}^{|\mathcal{S}_u|} \log \lambda(t_j | \mathcal{T}_t) - \int_{t_1}^{t^{|\mathcal{S}_u|}} \lambda(t | \mathcal{T}_t) \, dt \right),
+   \]
+   where:
+  - \(\mathcal{S}_u\) is the sequence of user \(u\)'s interactions.
+  - \(\lambda(t | \mathcal{T}_t)\) represents the intensity function for user interactions at time \(t\).
+   \[
+   \mathcal{L}_{final} = \mathcal{L}_{main} + \delta_2 \mathcal{L}_{auxi},
+   \]
+
+  - [KGUF](https://arxiv.org/pdf/2403.20095v1): It is based on knowledge of graphs and filtering of user semantic features, which improves the quality of recommendations.
+
+   ![An example of how KGUF models the item representation. Figure (a) shows the entities in the knowledge graph linked to the items. In figure (b), the most relevant semantic features selected by KGUF are reported.](../imgs/KGUF_arch.png)
+
+   \[
+   \mathcal{L}_{BPR} = \sum_{(u, i^+, i^-) \in \mathcal{T}} -\ln \sigma(\hat{r}_{ui^+} - \hat{r}_{ui^-}),
+   \]
+   where:
+      - \(\mathcal{T} = \{(u, i^+, i^-) | (u, i^+) \in \mathcal{R}, (u, i^-) \notin \mathcal{R}, i^- \in \mathcal{I} \}\) is the training set, with \(i^+\) being a positive item and \(i^-\) being a negative item.
+      - \(\sigma\) represents the sigmoid activation function.
+      - \(\hat{r}_{ui^+}\) and \(\hat{r}_{ui^-}\) are the predicted scores for positive and negative items, respectively.
+
+   \[
+   \mathcal{L} = \mathcal{L}_{BPR} + \lambda \| \Theta \|_2^2,
+   \]
+   where:
+      - \(\Theta\) includes all learnable parameters, specifically:
+   \[
+   \Theta = \{e_u, e_i, e_f \, | \, u \in \mathcal{U}, i \in \mathcal{I}, f \in \bigcup_{i \in \mathcal{I}} \mathcal{F}_i^* \},
+   \]
+
+  - [SIGformer](https://arxiv.org/pdf/2404.11982): Graph transformer architecture based on feedback polarity (positive and negative).
+
+   ![The illustration of proposed sign-aware path encoding and sign-aware spectral encoding in SIGformer.](../imgs/SIGformer_arch.png)
+
+   \[
+   \mathcal{L} = - \sum_{(u, i) \in \mathcal{E}^+} \ln \sigma(\hat{y}_{ui} - \hat{y}_{uj}) + \sum_{(u, i) \in \mathcal{E}^-} \ln \sigma(\beta (\hat{y}_{ui} - \hat{y}_{uj})),
+   \]
+   where:
+      - \(\mathcal{E}^+\) and \(\mathcal{E}^-\) represent sets of positive and negative feedback, respectively.
+      - For each feedback pair \((u, i)\), an item \(j \in \{j \in \mathcal{I} | y_{uj} = '?' \}\) is sampled, where the user \(u\) has not interacted with \(j\), for model optimization.
+      - \(\sigma\) denotes the sigmoid function.
+      - \(\beta\) is a hyperparameter that balances the influence of negative feedback.
+      - \(\hat{y}_{ui}\) and \(\hat{y}_{uj}\) are predicted scores for the respective items \(i\) and \(j\).
+
+  - [MacGNN](https://paperswithcode.com/paper/macro-graph-neural-networks-for-online): A macrographic neural network for online recommendations with big data, providing effective aggregation of information.
+
+   ![The model architecture of the proposed MacGNN.](../imgs/MacGNN_arch.png)
+
+   The binary cross-entropy loss function is defined as:
+
+   \[
+   \mathcal{L}_{\text{bce}} = -\frac{1}{|\mathcal{T}|} \sum_{(u,i) \in \mathcal{T}} \left[ y_{u,i} \log(\hat{y}_{u,i}) + (1 - y_{u,i}) \log(1 - \hat{y}_{u,i}) \right],
+   \]
+
+   where \(\hat{y}_{u,i}\) is the predicted CTR, and \(y_{u,i}\) is the ground-truth label.
+
+   The overall objective function of MacGNN is defined as:
+
+   \[
+   \mathcal{L} = \mathcal{L}_{\text{bce}} + \lambda \cdot \|\theta\|_2^2,
+   \]
+
+   where \(\lambda \cdot \|\theta\|_2^2\) denotes the \(L_2\) regularization term to avoid overfitting.
+
+---
+**Metrics:**
+The following metrics are used to evaluate the performance of the model:
+
+- **Precision@K**:
+  \[
+  Precision@K = \frac{1}{K} \sum_{i=1}^{K} \text{relevance}(i)
+  \]
+  where \(\text{relevance}(i)\) is an indicator of the relevance of the \(i\)-th item in the list.
+
+- **Recall@K**:
+  \[
+  Recall@K = \frac{\sum_{i=1}^{K} \text{relevance}(i)}{\text{Total Relevant Items}}
+  \]
+
+- **NDCG@K (Normalized Discounted Cumulative Gain)**:
+  \[
+  NDCG@K = \frac{DCG@K}{IDCG@K}, \quad DCG@K = \sum_{i=1}^{K} \frac{\text{relevance}(i)}{\log_2(i+1)}
+  \]
+  where \(IDCG@K\) is the ideal cumulative gain.
+
+- **AUC (Area Under Curve)**:
+  \[
+  AUC = \frac{1}{|P||N|} \sum_{p \in P} \sum_{n \in N} \mathbb{I}(s_p > s_n)
+  \]
+  where \(P\) and \(N\) are sets of positive and negative examples, \(s_p\) and \(s_n\) are their scores.
+
+---
+
+**Description of the ML Validation Scheme:**
+
+Given the specifics of the data and business tasks, the validation scheme is constructed as follows:
+
+- **Data Splitting**:
+  70% of the data is used for training, 15% for validation, and 15% for testing, employing a temporal split due to the presence of timestamps.
+
+- **K-fold Cross-Validation**:
+  The data is divided into \(K\) folds, each taking turns being the validation set while the others form the training set. This is used for hyperparameter tuning.
+
+---
+
+**Risks at This Stage and Mitigation Strategies:**
+
+1. **Overfitting**:
+   Use of Dropout, \(L_1\) and \(L_2\) regularization, and contrastive learning.
+2. **Prediction Smoothing**:
+   Application of overfitting mitigation techniques and reduction in model complexity.
+3. **Lack of Computational Resources**
+4. **Challenges with Dependencies and Running Open Code on New Datasets**
+
+---
+
+**MVP:** A working baseline with quality metrics for selected datasets, and GitHub branches with prepared and configured environments for each method.
+
+##### Stage 3. Hypothesizing a Model and Testing on the Data
+
+This stage is one of the most critical for this research. It involves defining the idea of a future model that should address some or all of the limitations described in Stage 2, Step 3.
+
+- **Step 5:** In this context, we propose (at a high level for now, with more detailed architecture to follow after the baseline step):
+
+![Our proposed approach.](../imgs/proposed_approach.png)
+
+**Development Ideas:**
+   - Study the relationship between the presence and absence of edges among all users.
+   - Select and describe a ranking model.
+   - Explore the "weight" of the proposed model.
+   - Develop a model inference pipeline to support online learning.
+   - Combine the loss proposed in the above methods with contrastive learning.
+   - Expand the idea of using "emotional" nodes: for explicitly expressive feedback, remember all items; for implicit feedback, implement a forgetting curve. References: boss nodes from NLP.
+
+**MVP:** The described hypothesis.
+
+- **Step 6:** Conduct experiments. To assess the quality of the hypothesis, a set of experiments needs to be conducted, with results logged in CometML for reproducibility.
+
+In case of failure, return to Step 5 and formulate new hypotheses.
+
+**MVP:** A repository with experiments and final code in the main branch on GitHub.
+
+##### Stage 4. Preparation of the Article
+
+This is the final stage where all results are summarized, and conclusions about the hypothesis and experiments are written.
+
+**MVP:** The article.
