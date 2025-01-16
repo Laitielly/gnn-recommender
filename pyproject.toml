@@ -5,7 +5,7 @@ description = ""
 authors = ["Anna Sidorova <anna.pav.sidorova@gmail.com>"]
 readme = "README.md"
 packages = [
-    { include = "ega" },
+    { include = "eda" },
     { include = "docs" }
 ]
 
