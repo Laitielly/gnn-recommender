@@ -4,6 +4,10 @@ version = "0.1.0"
 description = ""
 authors = ["Anna Sidorova <anna.pav.sidorova@gmail.com>"]
 readme = "README.md"
+packages = [
+    { include = "ega" },
+    { include = "docs" }
+]
 
 [tool.poetry.dependencies]
 python = "^3.10"
