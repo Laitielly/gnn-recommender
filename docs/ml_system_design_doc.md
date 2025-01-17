@@ -38,6 +38,7 @@ This project belongs to **research projects**. The expected results of all the w
 - Short-Term Goals: identify and outline challenges with existing SOTA GNN algorithms. -->
 
 **Why will it get better than it is now from using ML:**
+
 Classic recommender systems usually handle negative feedback only in the loss for better classification, ranking, or rating prediction. At the same time, information that the user is not interested in is very useful and reduces the risk of unwanted items. In addition, the training/retraining process typically occurs offline and on a periodic basis. This means that users' interests are updated only once per iteration of the retraining process, which can lead to decreased user satisfaction and significant resource costs.
 
 **What are the criteria for the success of an iteration from a business standpoint:**
@@ -303,108 +304,104 @@ The description of the sample creation for training, testing, and validation is 
 - **Step 4: Selecting and launching a baseline model.**
   From the list of models identified in **Step 3**, a baseline model should be selected. The main selection criteria include: high metrics on datasets, simplicity of implementation, available computational resources, and configured versions of the libraries in use. The following methods meet these criteria:
 
-  - [NFARec](https://ar5iv.labs.arxiv.org/html/2404.06900): Takes negative feedback into account to improve recommendations. Utilizes hypergraph convolutions and the Transformer Hawkes Process to analyze temporal dynamics.
+  1. [NFARec](https://ar5iv.labs.arxiv.org/html/2404.06900): Takes negative feedback into account to improve recommendations. Utilizes hypergraph convolutions and the Transformer Hawkes Process to analyze temporal dynamics.
 
    ![Architecture of NFARec framework. NFARec learns negative feedback in both sequential and structural patterns.](../imgs/NFARec_arch.png)
-   \[
-   \mathcal{L}_{main} = \sum_{(u \in \mathcal{U})} \sum_{(i \in \mathcal{I})} c_{u, i} \cdot \gamma_i^{(u)} \log(\alpha_4(\hat{R}_{u, i})),
-   \]
+  $`
+\mathcal{L}_{main} = \sum_{(u \in \mathcal{U})} \sum_{(i \in \mathcal{I})} c_{u, i} \cdot \gamma_i^{(u)} \log(\alpha_4(\hat{R}_{u, i})),
+`$
    where:
-  - \(\gamma^{(u)} \in \mathbb{R}^{|\mathcal{I}|}\) represents a label vector, in which each element equals 1 if the corresponding item is a ground-truth candidate; otherwise, 0.
-  - \(\alpha_4\) denotes the sigmoid activation function.
-  - \(c_{u, i}\) is set to: \(\beta_1\) when the user has interacted with the item, \(\beta_2\) when the user will interact with the item, and 0 otherwise.
-  - \(\hat{R}_{u, i}\) is the predicted score for user \(u\) and item \(i\).
-   \[
+  - $`\gamma^{(u)} \in \mathbb{R}^{|\mathcal{I}|}`$ represents a label vector, in which each element equals 1 if the corresponding item is a ground-truth candidate; otherwise, 0.
+  - $`\alpha_4`$ denotes the sigmoid activation function.
+  - $`c_{u, i}`$ is set to: $`\beta_1`$ when the user has interacted with the item, $`\beta_2`$ when the user will interact with the item, and 0 otherwise.
+  - $`\hat{R}_{u, i}`$ is the predicted score for user $`u`$ and item $`i`$.
+   $`
    \mathcal{L}_{auxi} = \sum_{(u \in \mathcal{U})} \left( \sum_{j=1}^{|\mathcal{S}_u|} \log \lambda(t_j | \mathcal{T}_t) - \int_{t_1}^{t^{|\mathcal{S}_u|}} \lambda(t | \mathcal{T}_t) \, dt \right),
-   \]
+    `$
    where:
-  - \(\mathcal{S}_u\) is the sequence of user \(u\)'s interactions.
-  - \(\lambda(t | \mathcal{T}_t)\) represents the intensity function for user interactions at time \(t\).
-   \[
+  - $`\mathcal{S}_u`$ is the sequence of user \(u\)'s interactions.
+  - $`\lambda(t | \mathcal{T}_t)`$ represents the intensity function for user interactions at time $`t`$.
+    $`
    \mathcal{L}_{final} = \mathcal{L}_{main} + \delta_2 \mathcal{L}_{auxi},
-   \]
+    `$
 
-  - [KGUF](https://arxiv.org/pdf/2403.20095v1): It is based on knowledge of graphs and filtering of user semantic features, which improves the quality of recommendations.
+  2. [KGUF](https://arxiv.org/pdf/2403.20095v1): It is based on knowledge of graphs and filtering of user semantic features, which improves the quality of recommendations.
 
    ![An example of how KGUF models the item representation. Figure (a) shows the entities in the knowledge graph linked to the items. In figure (b), the most relevant semantic features selected by KGUF are reported.](../imgs/KGUF_arch.png)
 
-   \[
-   \mathcal{L}_{BPR} = \sum_{(u, i^+, i^-) \in \mathcal{T}} -\ln \sigma(\hat{r}_{ui^+} - \hat{r}_{ui^-}),
-   \]
-   where:
-      - \(\mathcal{T} = \{(u, i^+, i^-) | (u, i^+) \in \mathcal{R}, (u, i^-) \notin \mathcal{R}, i^- \in \mathcal{I} \}\) is the training set, with \(i^+\) being a positive item and \(i^-\) being a negative item.
-      - \(\sigma\) represents the sigmoid activation function.
-      - \(\hat{r}_{ui^+}\) and \(\hat{r}_{ui^-}\) are the predicted scores for positive and negative items, respectively.
+   $`\mathcal{L}_{BPR} = \sum_{(u, i^+, i^-) \in \mathcal{T}} -\ln \sigma(\hat{r}_{ui^+} - \hat{r}_{ui^-}),`$ where:
+  
+   - $`\mathcal{T} = \{(u, i^+, i^-) | (u, i^+) \in \mathcal{R}, (u, i^-) \notin \mathcal{R}, i^- \in \mathcal{I} \}`$ is the training set, with $`i^+`$ being a positive item and $`i^-`$ being a negative item.
+  
+   - $`\sigma`$ represents the sigmoid activation function.
 
-   \[
+   - $`\hat{r}_{ui^+}`$ and $`\hat{r}_{ui^-}`$ are the predicted scores for positive and negative items, respectively.
+
+   $`
    \mathcal{L} = \mathcal{L}_{BPR} + \lambda \| \Theta \|_2^2,
-   \]
-   where:
-      - \(\Theta\) includes all learnable parameters, specifically:
-   \[
-   \Theta = \{e_u, e_i, e_f \, | \, u \in \mathcal{U}, i \in \mathcal{I}, f \in \bigcup_{i \in \mathcal{I}} \mathcal{F}_i^* \},
-   \]
+   `$ where:
 
-  - [SIGformer](https://arxiv.org/pdf/2404.11982): Graph transformer architecture based on feedback polarity (positive and negative).
+   - $`\Theta`$ includes all learnable parameters, specifically:
+  
+   - $`\Theta = \{e_u, e_i, e_f \, | \, u \in \mathcal{U}, i \in \mathcal{I}, f \in \bigcup_{i \in \mathcal{I}} \mathcal{F}_i^* \}`$
+
+  3. [SIGformer](https://arxiv.org/pdf/2404.11982): Graph transformer architecture based on feedback polarity (positive and negative).
 
    ![The illustration of proposed sign-aware path encoding and sign-aware spectral encoding in SIGformer.](../imgs/SIGformer_arch.png)
 
-   \[
-   \mathcal{L} = - \sum_{(u, i) \in \mathcal{E}^+} \ln \sigma(\hat{y}_{ui} - \hat{y}_{uj}) + \sum_{(u, i) \in \mathcal{E}^-} \ln \sigma(\beta (\hat{y}_{ui} - \hat{y}_{uj})),
-   \]
-   where:
-      - \(\mathcal{E}^+\) and \(\mathcal{E}^-\) represent sets of positive and negative feedback, respectively.
-      - For each feedback pair \((u, i)\), an item \(j \in \{j \in \mathcal{I} | y_{uj} = '?' \}\) is sampled, where the user \(u\) has not interacted with \(j\), for model optimization.
-      - \(\sigma\) denotes the sigmoid function.
-      - \(\beta\) is a hyperparameter that balances the influence of negative feedback.
-      - \(\hat{y}_{ui}\) and \(\hat{y}_{uj}\) are predicted scores for the respective items \(i\) and \(j\).
+   $` \mathcal{L} = - \sum_{(u, i) \in \mathcal{E}^+} \ln \sigma(\hat{y}_{ui} - \hat{y}_{uj}) + \sum_{(u, i) \in \mathcal{E}^-} \ln \sigma(\beta (\hat{y}_{ui} - \hat{y}_{uj})),`$ where:
+  
+  - $`\mathcal{E}^+`$ and $`\mathcal{E}^-`$ represent sets of positive and negative feedback, respectively.
+  
+  - For each feedback pair $`(u, i)`$, an item $`j \in \{j \in \mathcal{I} | y_{uj} = '?' \}`$ is sampled, where the user $`u`$ has not interacted with $`j`$, for model optimization.
+      
+  - $`\sigma`$ denotes the sigmoid function.
 
-  - [MacGNN](https://paperswithcode.com/paper/macro-graph-neural-networks-for-online): A macrographic neural network for online recommendations with big data, providing effective aggregation of information.
+  - $`\beta`$ is a hyperparameter that balances the influence of negative feedback.
+
+  - $`\hat{y}_{ui}`$ and $`\hat{y}_{uj}`$ are predicted scores for the respective items $`i`$ and $`j`$.
+
+  4. [MacGNN](https://paperswithcode.com/paper/macro-graph-neural-networks-for-online): A macrographic neural network for online recommendations with big data, providing effective aggregation of information.
 
    ![The model architecture of the proposed MacGNN.](../imgs/MacGNN_arch.png)
 
    The binary cross-entropy loss function is defined as:
 
-   \[
-   \mathcal{L}_{\text{bce}} = -\frac{1}{|\mathcal{T}|} \sum_{(u,i) \in \mathcal{T}} \left[ y_{u,i} \log(\hat{y}_{u,i}) + (1 - y_{u,i}) \log(1 - \hat{y}_{u,i}) \right],
-   \]
+   $`\mathcal{L}_{\text{bce}} = -\frac{1}{|\mathcal{T}|} \sum_{(u,i) \in \mathcal{T}} \left[ y_{u,i} \log(\hat{y}_{u,i}) + (1 - y_{u,i}) \log(1 - \hat{y}_{u,i}) \right],`$
 
-   where \(\hat{y}_{u,i}\) is the predicted CTR, and \(y_{u,i}\) is the ground-truth label.
+   where $`\hat{y}_{u,i}`$ is the predicted CTR, and $`y_{u,i}`$ is the ground-truth label.
 
    The overall objective function of MacGNN is defined as:
 
-   \[
-   \mathcal{L} = \mathcal{L}_{\text{bce}} + \lambda \cdot \|\theta\|_2^2,
-   \]
+   $`\mathcal{L} = \mathcal{L}_{\text{bce}} + \lambda \cdot \|\theta\|_2^2,`$
 
-   where \(\lambda \cdot \|\theta\|_2^2\) denotes the \(L_2\) regularization term to avoid overfitting.
+   where $`\lambda \cdot \|\theta\|_2^2`$ denotes the $`L_2\) regularization term to avoid overfitting.
 
 ---
 **Metrics:**
 The following metrics are used to evaluate the performance of the model:
 
 - **Precision@K**:
-  \[
-  Precision@K = \frac{1}{K} \sum_{i=1}^{K} \text{relevance}(i)
-  \]
-  where \(\text{relevance}(i)\) is an indicator of the relevance of the \(i\)-th item in the list.
+
+  $`Precision@K = \frac{1}{K} \sum_{i=1}^{K} \text{relevance}(i)`$
+  
+  where $`\text{relevance}(i)`$ is an indicator of the relevance of the $`i`$-th item in the list.
 
 - **Recall@K**:
-  \[
-  Recall@K = \frac{\sum_{i=1}^{K} \text{relevance}(i)}{\text{Total Relevant Items}}
-  \]
+  
+  $`Recall@K = \frac{\sum_{i=1}^{K} \text{relevance}(i)}{\text{Total Relevant Items}}`$
 
 - **NDCG@K (Normalized Discounted Cumulative Gain)**:
-  \[
-  NDCG@K = \frac{DCG@K}{IDCG@K}, \quad DCG@K = \sum_{i=1}^{K} \frac{\text{relevance}(i)}{\log_2(i+1)}
-  \]
-  where \(IDCG@K\) is the ideal cumulative gain.
+  $`
+  NDCG@K = \frac{DCG@K}{IDCG@K}, \quad DCG@K = \sum_{i=1}^{K} \frac{\text{relevance}(i)}{\log_2(i+1)}`$
+  
+  where $`IDCG@K`$ is the ideal cumulative gain.
 
 - **AUC (Area Under Curve)**:
-  \[
-  AUC = \frac{1}{|P||N|} \sum_{p \in P} \sum_{n \in N} \mathbb{I}(s_p > s_n)
-  \]
-  where \(P\) and \(N\) are sets of positive and negative examples, \(s_p\) and \(s_n\) are their scores.
+
+  $`AUC = \frac{1}{|P||N|} \sum_{p \in P} \sum_{n \in N} \mathbb{I}(s_p > s_n)`$
+  
+  where $`P`$ and $`N`$ are sets of positive and negative examples, $`s_p`$ and $`s_n`$ are their scores.
 
 ---
 
@@ -423,7 +420,7 @@ Given the specifics of the data and business tasks, the validation scheme is con
 **Risks at This Stage and Mitigation Strategies:**
 
 1. **Overfitting**:
-   Use of Dropout, \(L_1\) and \(L_2\) regularization, and contrastive learning.
+   Use of Dropout, $`L_1`$ and $`L_2`$ regularization, and contrastive learning.
 2. **Prediction Smoothing**:
    Application of overfitting mitigation techniques and reduction in model complexity.
 3. **Lack of Computational Resources**
