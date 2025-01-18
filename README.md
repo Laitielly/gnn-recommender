@@ -1,33 +1,20 @@
-# Graph-based recommender systems with explicit negative feedback encoding
+# SIGformer: Sign-aware Graph Transformer for Recommendation
 
-## Description
+This is the PyTorch implementation for SIGIR 2024 paper.
+> Sirui Chen, Jiawei Chen, Sheng Zhou, Bohao Wang, Shen Han, Chanfei Su, Yuqing Yuan, Can Wang 2024. SIGformer: Sign-aware Graph Transformer for Recommendation
+ [arXiv link](https://arxiv.org/abs/2404.11982)
 
-Classic recommender systems usually handle negative feedback only in the loss for better classification, ranking, or rating prediction. The project aims to develop a graph-based recommender system that can directly handle negative items to improve recommendation performance.
+ Original code from this [repo](https://github.com/StupidThree/SIGformer).
 
-**The project started:** October 15, 2024
+## Datasets
 
-**Expected end date:** June 2025
+| Dataset| #Users | #Items | #Interactions | Pos/Neg |
+|---|---|---|---|---|
+| SberZvuk | 51,267 | 46,464 | 895,266 | 1:0.22 |
+| KuaiRand | 16,974 | 4,373 | 263,100 | 1:1.25 |
 
-## How to run
-
-The project has configured formatters and linters, and is equipped with a pre-commit.
-
-How to set up an environment with poetry:
-
-```
-cd ./gnn-recommender-directory
-poetry install
-```
-
-How to start a pre-commit manually before pushing changes:
-
-```
-git add changes
-poetry run pre-commit install
-poetry run pre-commit run --all-files
-```
-
-## What we have now
-
-- A design document is available for review and study in [./docs/ml_system_design_doc.md](https://github.com/Laitielly/gnn-recommender/blob/main/docs/ml_system_design_doc.md).
-- Completed research on 30 articles and presented the findings in a presentation. The research is available for review in [./research_documents/AIRI_research.pdf](https://github.com/Laitielly/gnn-recommender/blob/main/research_documents/AIRI_research.pdf).
+## Training & Evaluation
+* KuaiRand
+  ```bash
+  python -u code/main.py --data=KuaiRand --offset=1 --alpha=0.2 --beta=1 --sample_hop=3
+  ```
