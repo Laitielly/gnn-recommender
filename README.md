@@ -10,7 +10,7 @@ This is the PyTorch implementation for SIGIR 2024 paper.
 
 | Dataset| #Users | #Items | #Interactions | Pos/Neg |
 |---|---|---|---|---|
-| SberZvuk | 51,267 | 46,464 | 895,266 | 1:0.22 |
+| SberZvuk | 999 | 7401 | 6 911 972  | 1:1.5 |
 | KuaiRand | 16,974 | 4,373 | 263,100 | 1:1.25 |
 
 ## Training & Evaluation
@@ -18,3 +18,13 @@ This is the PyTorch implementation for SIGIR 2024 paper.
   ```bash
   python -u code/main.py --data=KuaiRand --offset=1 --alpha=0.2 --beta=1 --sample_hop=3
   ```
+* SberZvuk (data download and preparing is required)
+  ```bash
+  python -u baseline/main.py --data=1kSberData --offset=0.5 --alpha=0.2 --beta=1 --sample_hop=1 --hidden_dim 8 --n_layers 1 --test_batch_size 256
+  ```
+## Results on test
+
+| Dataset| Recall@20 | Precision@20 | NDCG@20 |
+|---|---|---|---|
+| KuaiRand | 0.15 | 0.015 | 0.072  |
+| SberZvuk | 0.0014 | 0.02 | 0.023 |
