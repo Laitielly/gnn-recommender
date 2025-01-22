@@ -1,0 +1,11 @@
+.venv/
+
+*.tar.gz
+*.tgz
+*.zip
+
+Python-*/
+
+__pycache__/
+*.pyc
+*.pyo

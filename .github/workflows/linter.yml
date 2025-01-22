@@ -1,0 +1,35 @@
+name: Run linter and formatter
+
+on:
+  push:
+    branches: ["main", "NFArec"]
+  pull_request:
+    branches: ["main", "NFArec"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v2
+
+      - name: Install dependencies with poetry
+        run: poetry install --no-root
+
+      - name: Run linter with Ruff
+        run: poetry run ruff check .
+
+      - name: Run formatter with Black
+        run: poetry run black --check .
