@@ -1,0 +1,41 @@
+
+         /\      Grafana   /‾‾/
+    /\  /  \     |\  __   /  /
+   /  \/    \    | |/ /  /   ‾‾\
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/
+
+     execution: local
+        script: model/test.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 2500 max VUs, 20m30s max duration (incl. graceful stop):
+              * default: 2500 looping VUs for 20m0s (gracefulStop: 30s)
+
+
+     ✗ Status is 200
+      ↳  99% — ✓ 694553 / ✗ 2487
+     ✗ Response time is < 200ms
+      ↳  0% — ✓ 1005 / ✗ 696035
+
+     checks.........................: 49.89% 695558 out of 1394080
+     data_received..................: 122 MB 101 kB/s
+     data_sent......................: 114 MB 95 kB/s
+     http_req_blocked...............: avg=1.23ms   min=0s       med=4µs  max=1.06s    p(90)=6µs   p(95)=7µs
+     http_req_connecting............: avg=1.23ms   min=0s       med=0s   max=1.06s    p(90)=0s    p(95)=0s
+     http_req_duration..............: avg=3.3s     min=0s       med=3.3s max=6.54s    p(90)=3.58s p(95)=3.69s
+       { expected_response:true }...: avg=3.31s    min=123.66ms med=3.3s max=6.54s    p(90)=3.58s p(95)=3.69s
+     http_req_failed................: 0.35%  2487 out of 697040
+     http_req_receiving.............: avg=283.78µs min=0s       med=28µs max=175.39ms p(90)=906µs p(95)=1.6ms
+     http_req_sending...............: avg=21.17µs  min=0s       med=12µs max=18.13ms  p(90)=22µs  p(95)=27µs
+     http_req_tls_handshaking.......: avg=0s       min=0s       med=0s   max=0s       p(90)=0s    p(95)=0s
+     http_req_waiting...............: avg=3.3s     min=0s       med=3.3s max=6.54s    p(90)=3.58s p(95)=3.69s
+     http_reqs......................: 697040 579.645721/s
+     iteration_duration.............: avg=4.3s     min=1.07s    med=4.3s max=7.54s    p(90)=4.58s p(95)=4.69s
+     iterations.....................: 697040 579.645721/s
+     vus............................: 987    min=987               max=2500
+     vus_max........................: 2500   min=2500              max=2500
+
+
+running (20m02.5s), 0000/2500 VUs, 697040 complete and 0 interrupted iterations
+default ✓ [======================================] 2500 VUs  20m0s

@@ -1,20 +1,38 @@
 # SIGformer: Sign-aware Graph Transformer for Recommendation
 
-This is the PyTorch implementation for SIGIR 2024 paper.
-> Sirui Chen, Jiawei Chen, Sheng Zhou, Bohao Wang, Shen Han, Chanfei Su, Yuqing Yuan, Can Wang 2024. SIGformer: Sign-aware Graph Transformer for Recommendation
- [arXiv link](https://arxiv.org/abs/2404.11982)
+Inference implementation for KuaiRand, implemented using FastAPI. Load testing was performed using k6 grafana. The metrics were collected using prometheus.
 
- Original code from this [repo](https://github.com/StupidThree/SIGformer).
+## How do I launch it?
 
-## Datasets
+- Download the docker image of grafana and prometheus:
 
-| Dataset| #Users | #Items | #Interactions | Pos/Neg |
-|---|---|---|---|---|
-| SberZvuk | 51,267 | 46,464 | 895,266 | 1:0.22 |
-| KuaiRand | 16,974 | 4,373 | 263,100 | 1:1.25 |
+```cmd
+docker pull prom/prometheus:latest
+docker pull grafana/grafana:latest
+```
 
-## Training & Evaluation
-* KuaiRand
-  ```bash
-  python -u code/main.py --data=KuaiRand --offset=1 --alpha=0.2 --beta=1 --sample_hop=3
-  ```
+- Build the images:
+
+```cmd
+docker-compose up -d --build
+```
+
+Ready! The application is running on ```http://localhost:8080```! You can get recommendations using a post request ```http://localhost:8080/recommendations\```.
+
+Also you can set up a dashboard in grafana using Prometheus and monitor the status of requests and the load.
+
+If you want to run the application without grafana and prometheus, then simply run:
+
+```cmd
+poetry install
+poetry run uvicorn model.app:app --host 0.0.0.0 --port 8080
+```
+
+## Load testing results
+
+There were three launches: for 100 users for 20 minutes, for 2500 users for 20 minutes and 5000 users for 20 minutes. The logs of each launch can be viewed in the test_results/logs folder.
+
+We got the following metrics results:
+
+![Load testing result 1](test_results/images/graphana_image1.png)
+![Load testing result 2](test_results/images/graphana_image2.png)

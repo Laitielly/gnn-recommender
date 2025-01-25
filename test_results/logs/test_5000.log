@@ -1,0 +1,41 @@
+
+         /\      Grafana   /‾‾/
+    /\  /  \     |\  __   /  /
+   /  \/    \    | |/ /  /   ‾‾\
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/
+
+     execution: local
+        script: model/test.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 5000 max VUs, 20m30s max duration (incl. graceful stop):
+              * default: 5000 looping VUs for 20m0s (gracefulStop: 30s)
+
+
+     ✗ Status is 200
+      ↳  99% — ✓ 678786 / ✗ 4700
+     ✗ Response time is < 200ms
+      ↳  0% — ✓ 2292 / ✗ 681194
+
+     checks.........................: 49.82% 681078 out of 1366972
+     data_received..................: 119 MB 99 kB/s
+     data_sent......................: 112 MB 93 kB/s
+     http_req_blocked...............: avg=2.96ms   min=0s      med=3µs   max=1.07s   p(90)=5µs   p(95)=7µs
+     http_req_connecting............: avg=2.95ms   min=0s      med=0s    max=1.07s   p(90)=0s    p(95)=0s
+     http_req_duration..............: avg=7.79s    min=0s      med=7.89s max=9.76s   p(90)=8.5s  p(95)=8.68s
+       { expected_response:true }...: avg=7.84s    min=384.6ms med=7.89s max=9.76s   p(90)=8.5s  p(95)=8.68s
+     http_req_failed................: 0.68%  4700 out of 683486
+     http_req_receiving.............: avg=211.88µs min=0s      med=27µs  max=408.4ms p(90)=596µs p(95)=1.21ms
+     http_req_sending...............: avg=25.88µs  min=0s      med=11µs  max=49.74ms p(90)=21µs  p(95)=27µs
+     http_req_tls_handshaking.......: avg=0s       min=0s      med=0s    max=0s      p(90)=0s    p(95)=0s
+     http_req_waiting...............: avg=7.79s    min=0s      med=7.89s max=9.76s   p(90)=8.5s  p(95)=8.68s
+     http_reqs......................: 683486 567.384608/s
+     iteration_duration.............: avg=8.79s    min=1.27s   med=8.89s max=10.76s  p(90)=9.5s  p(95)=9.68s
+     iterations.....................: 683486 567.384608/s
+     vus............................: 33     min=33                max=5000
+     vus_max........................: 5000   min=5000              max=5000
+
+
+running (20m04.6s), 0000/5000 VUs, 683486 complete and 0 interrupted iterations
+default ✓ [======================================] 5000 VUs  20m0s

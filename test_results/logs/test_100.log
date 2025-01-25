@@ -1,0 +1,39 @@
+
+         /\      Grafana   /‾‾/
+    /\  /  \     |\  __   /  /
+   /  \/    \    | |/ /  /   ‾‾\
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/
+
+     execution: local
+        script: model/test.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 100 max VUs, 20m30s max duration (incl. graceful stop):
+              * default: 100 looping VUs for 20m0s (gracefulStop: 30s)
+
+
+     ✓ Status is 200
+     ✗ Response time is < 200ms
+      ↳  99% — ✓ 117204 / ✗ 298
+
+     checks.........................: 99.87% 234706 out of 235004
+     data_received..................: 21 MB  17 kB/s
+     data_sent......................: 19 MB  16 kB/s
+     http_req_blocked...............: avg=10.5µs   min=1µs    med=4µs     max=8.73ms  p(90)=10µs    p(95)=14µs
+     http_req_connecting............: avg=4.24µs   min=0s     med=0s      max=7.33ms  p(90)=0s      p(95)=0s
+     http_req_duration..............: avg=21.09ms  min=2.04ms med=13.24ms max=1.59s   p(90)=45.23ms p(95)=57.19ms
+       { expected_response:true }...: avg=21.09ms  min=2.04ms med=13.24ms max=1.59s   p(90)=45.23ms p(95)=57.19ms
+     http_req_failed................: 0.00%  0 out of 117502
+     http_req_receiving.............: avg=162.43µs min=10µs   med=33µs    max=45.81ms p(90)=406µs   p(95)=757µs
+     http_req_sending...............: avg=22.08µs  min=4µs    med=16µs    max=17.97ms p(90)=40µs    p(95)=54µs
+     http_req_tls_handshaking.......: avg=0s       min=0s     med=0s      max=0s      p(90)=0s      p(95)=0s
+     http_req_waiting...............: avg=20.91ms  min=2.01ms med=13ms    max=1.59s   p(90)=45.04ms p(95)=57.04ms
+     http_reqs......................: 117502 97.840083/s
+     iteration_duration.............: avg=1.02s    min=1s     med=1.01s   max=2.59s   p(90)=1.04s   p(95)=1.05s
+     iterations.....................: 117502 97.840083/s
+     vus............................: 10     min=10               max=100
+     vus_max........................: 100    min=100              max=100
+
+
+running (20m01.0s), 000/100 VUs, 117502 complete and 0 interrupted iterations
