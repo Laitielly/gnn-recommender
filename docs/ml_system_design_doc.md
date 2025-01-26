@@ -439,12 +439,13 @@ This stage is one of the most critical for this research. It involves defining t
 ![Our proposed approach.](../imgs/proposed_approach.png)
 
 **Development Ideas:**
-   - Study the relationship between the presence and absence of edges among all users.
-   - Select and describe a ranking model.
-   - Explore the "weight" of the proposed model.
-   - Develop a model inference pipeline to support online learning.
-   - Combine the loss proposed in the above methods with contrastive learning.
-   - Expand the idea of using "emotional" nodes: for explicitly expressive feedback, remember all items; for implicit feedback, implement a forgetting curve. References: boss nodes from NLP.
+
+- Study the relationship between the presence and absence of edges among all users.
+- Select and describe a ranking model.
+- Explore the "weight" of the proposed model.
+- Develop a model inference pipeline to support online learning.
+- Combine the loss proposed in the above methods with contrastive learning.
+- Expand the idea of using "emotional" nodes: for explicitly expressive feedback, remember all items; for implicit feedback, implement a forgetting curve. References: boss nodes from NLP.
 
 **MVP:** The described hypothesis.
 
@@ -460,7 +461,9 @@ This is the final stage where all results are summarized, and conclusions about 
 
 **MVP:** The article.
 
-### 3. Iteration of experiments & Baseline results
+### 3. Baseline
+
+#### 3.1 Iteration of experiments & Baseline results
 
 The data selected for this study is extensive. The simplified KuaiRand dataset alone contains 1,000 users and 34 million items! Due to resource constraints at this point (a trial run for baseline comparison in our publication), we have decided to follow the lead of our scientific community colleagues and reduce the data, taking only the interactions that were used to launch the two solutions ([NFARec](https://ar5iv.labs.arxiv.org/html/2404.06900) and [SIGformer](https://arxiv.org/pdf/2404.11982)) that have been published so far, and two additional solutions are currently in the pipeline.
 Currently, two solutions, x and y, have been released, with two more expected soon.
@@ -481,7 +484,22 @@ The next stage, after completing the launch of the baseline, is the implementati
 
 **MVP:** branches with custom code and environment, completed table.
 
-### 4. Подготовка пилота
+#### 3.2 Load testing
+
+Inference implementation for KuaiRand, implemented using FastAPI. Load testing was performed using k6 grafana. The metrics were collected using prometheus.
+
+The code and results are available on the [inference](https://github.com/Laitielly/gnn-recommender/tree/inference) branch.
+
+**Load testing results:**
+
+There were three launches: for 100 users for 20 minutes, for 2500 users for 20 minutes and 5000 users for 20 minutes.
+
+We got the following metrics results:
+
+![Load testing result 1](../imgs/graphana_image1.png)
+![Load testing result 2](../imgs/graphana_image2.png)
+
+### 4. Pilot project preparation
 
 #### 4.1. Pilot Evaluation Methodology
 
@@ -621,3 +639,163 @@ Regardless of the pilot outcome, we collect analytics, generate new ideas and hy
    - Generate updated recommendations using the retrained ranker.
 
 This iterative and adaptive process ensures the recommendation system remains responsive to dynamic user preferences while maintaining high accuracy and relevance.
+
+### 5. Implementation
+
+#### 5.1. Solution Architecture
+
+A sample solution architecture is proposed here; the final version is yet to be discussed:
+
+![Solution Architecture](../imgs/system_arch.jpg)
+
+What is presented:
+
+1. **User & User Device**
+   - **Purpose**: User devices send requests for recommendations and provide feedback.
+   - **API Methods**:
+     - `GET /recommendations`: Request a list of recommendations.
+     - `POST /feedback`: Submit feedback (clicks, likes, dislikes).
+
+2. **Recommendation Serving**
+   - **Purpose**: Process recommendation requests and rank content.
+   - **API Methods**:
+     - `POST /rank`: Generate a list of recommendations.
+     - `POST /log`: Log interactions.
+
+3. **Logging & Monitoring**
+   - **Purpose**:
+     - Log user interactions (clicks, likes).
+     - Collect performance and system state metrics.
+   - **API Methods**:
+     - `POST /log/interactions`: Log user actions.
+     - `GET /metrics`: Access metrics (Prometheus).
+
+4. **Data Store**
+   - **Purpose**: Store data about users, objects, and interactions.
+   - **API Methods**:
+     - `GET /history/{user_id}`: Retrieve the interaction history of a user.
+     - `PUT /store`: Save or update data.
+
+5. **Workers (Data Preprocessing)**
+   - **Purpose**: Preprocess data and compute features.
+   - **API Methods**:
+     - `POST /process`: Submit data for processing.
+     - `GET /status`: Check the processing status.
+
+6. **Offline Computing Center**
+   - **Feature Store**:
+     - **Purpose**: Store and manage features.
+     - **API Methods**:
+       - `GET /features/{id}`: Retrieve features for an object.
+       - `POST /features/update`: Update features.
+   - **Item/User Embeddings**:
+     - **Purpose**: Generate vector representations of objects and users.
+     - **API Methods**:
+       - `GET /embeddings/{id}`: Retrieve embeddings for an object or user.
+   - **Model Store**:
+     - **Purpose**: Store models and their versions.
+     - **API Methods**:
+       - `GET /model/latest`: Retrieve the latest model version.
+       - `POST /model/update`: Update the model.
+
+7. **Model CTR Service**
+   - **Purpose**: Rank content based on click-through probability.
+   - **API Methods**:
+     - `POST /rank`: Rank a list of recommendations.
+     - `POST /rerank`: Re-rank a list of recommendations.
+
+8. **Graph Structure Center**
+   - **Purpose**: Manage the graph of connections between users and objects.
+   - **API Methods**:
+     - `GET /graph/{id}`: Retrieve connections for a node.
+     - `POST /graph/update`: Update the graph.
+
+9. **Monitoring (Drift & Performance)**
+   - **Purpose**: Monitor system and model performance, track data drift.
+   - **API Methods**:
+     - `GET /monitor/drift`: Check for data drift.
+     - `GET /monitor/performance`: Retrieve system performance metrics.
+
+#### 5.2. Infrastructure and Scalability Description
+
+- Rigorous peak load testing is required as the system complexity directly depends on the number of users and items. Under high load, methods requiring fewer resources should be considered.
+- Model inference can be organized in a Kubernetes cluster with automatic node scaling based on monitoring system events.
+- The system is currently optimized for the project's goals: online learning.
+- Use of distributed caching (Redis/Memcached) for frequently accessed data.
+
+#### 5.3. System Performance Requirements
+
+**Key SLA Parameters:**
+
+- **Availability**:
+  - Minimum system availability — 99.9% (no more than 43 minutes of downtime per month).
+- **Response Time (Latency)**:
+  - Average recommendation service latency — < 500 ms.
+  - Maximum latency under peak load — < 2 s.
+- **Throughput**:
+  - Support for 1000 RPS (requests per second) on average.
+  - Scalability up to 5000 RPS during peak loads.
+  - Throughput and latency are ensured by system structure and scalability.
+
+**Factors Affecting Latency**:
+
+- Feature preprocessing.
+- Feature Store access speed.
+- Embedding or ranking computation time.
+
+**Monitoring**:
+
+The monitoring service tracks:
+
+- Technical metrics
+- Server load
+- Service load
+- Proxy metrics for recommendation quality
+- Offline metrics
+- Data drift
+
+Continuous monitoring via Grafana/Prometheus with alerts for SLA breaches. In case of threshold breaches:
+
+- Switch to a previous or historical model.
+- If overloaded, provide recommendations based on preprocessed data (fallback).
+- Notify analysts and other teams.
+- Trigger pipeline retraining.
+
+#### 5.4. System Security
+
+The recommendation system, as described in the diagram, should incorporate multiple layers of security to protect user data, models, and infrastructure from threats. Key aspects:
+
+1. **Data Security**
+   - **Data Encryption**:
+     - Data in storage (Feature Store, Model Store) must be encrypted using protocols like AES-256.
+     - Use TLS (e.g., HTTPS) to encrypt all service-to-service communications.
+   - **Data Anonymization**:
+     - Remove or replace identifiable user data (PII), such as names, addresses, or phone numbers, with tokens.
+   - **Access Control**:
+     - Use RBAC (Role-Based Access Control) to restrict data access. For instance, user data is accessible only to services that process it.
+
+2. **Model Security**
+   - **Protection Against Model Attacks** (real-time model tampering detection, use of isolated model copies).
+
+3. **API Security**
+   - Authentication and authorization.
+   - API rate limiting to prevent DoS attacks.
+   - Input validation to protect against SQL injection and other vulnerabilities.
+
+#### 5.5. Data Security
+
+Data security is ensured by storing data 100% on internal servers, anonymization, and encryption.
+
+#### 5.6. Costs
+
+- Costs for a GPU cluster with a minimum of 24GB (calculated for current datasets).
+- Costs for 2 ML Engineers and a Data Engineer to configure the proposed architecture and conduct A/B tests.
+- Estimated monthly system operating costs & infrastructure expenses.
+
+#### 5.7. Risks
+
+- Risk of system shutdown under high load due to insufficient computational resources (large model, poorly designed fallback mechanisms, attacks).
+- Technical failure in the model — switch to the previous or historical version.
+- Monitoring metric failure above average threshold — notify.
+- Monitoring metric failure above critical threshold — switch to a lighter historical model.
+- Risk of database overflow with high user activity — develop a mechanism for clearing old data.
