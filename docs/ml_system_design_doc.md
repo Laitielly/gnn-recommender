@@ -1,6 +1,6 @@
 # ML System Design Doc - [En]
 
-## ML System Design - \<Graph-based recommender systems with explicit negative feedback encoding\> \<MVP\> \<0.1.1\>
+## ML System Design - \<Graph-based recommender systems with explicit negative feedback encoding\> \<MVP\> \<0.2.0\>
 
 This project belongs to **research projects**. The expected results of all the work will be **an article** describing the proposed approach and the implementation of **mvp** in the form of an algorithm.
 
@@ -330,9 +330,9 @@ The description of the sample creation for training, testing, and validation is 
    ![An example of how KGUF models the item representation. Figure (a) shows the entities in the knowledge graph linked to the items. In figure (b), the most relevant semantic features selected by KGUF are reported.](../imgs/KGUF_arch.png)
 
    $`\mathcal{L}_{BPR} = \sum_{(u, i^+, i^-) \in \mathcal{T}} -\ln \sigma(\hat{r}_{ui^+} - \hat{r}_{ui^-}),`$ where:
-  
+
    - $`\mathcal{T} = \{(u, i^+, i^-) | (u, i^+) \in \mathcal{R}, (u, i^-) \notin \mathcal{R}, i^- \in \mathcal{I} \}`$ is the training set, with $`i^+`$ being a positive item and $`i^-`$ being a negative item.
-  
+
    - $`\sigma`$ represents the sigmoid activation function.
 
    - $`\hat{r}_{ui^+}`$ and $`\hat{r}_{ui^-}`$ are the predicted scores for positive and negative items, respectively.
@@ -342,7 +342,7 @@ The description of the sample creation for training, testing, and validation is 
    `$ where:
 
    - $`\Theta`$ includes all learnable parameters, specifically:
-  
+
    - $`\Theta = \{e_u, e_i, e_f \, | \, u \in \mathcal{U}, i \in \mathcal{I}, f \in \bigcup_{i \in \mathcal{I}} \mathcal{F}_i^* \}`$
 
   3. [SIGformer](https://arxiv.org/pdf/2404.11982): Graph transformer architecture based on feedback polarity (positive and negative).
@@ -350,11 +350,11 @@ The description of the sample creation for training, testing, and validation is 
    ![The illustration of proposed sign-aware path encoding and sign-aware spectral encoding in SIGformer.](../imgs/SIGformer_arch.png)
 
    $` \mathcal{L} = - \sum_{(u, i) \in \mathcal{E}^+} \ln \sigma(\hat{y}_{ui} - \hat{y}_{uj}) + \sum_{(u, i) \in \mathcal{E}^-} \ln \sigma(\beta (\hat{y}_{ui} - \hat{y}_{uj})),`$ where:
-  
+
   - $`\mathcal{E}^+`$ and $`\mathcal{E}^-`$ represent sets of positive and negative feedback, respectively.
-  
+
   - For each feedback pair $`(u, i)`$, an item $`j \in \{j \in \mathcal{I} | y_{uj} = '?' \}`$ is sampled, where the user $`u`$ has not interacted with $`j`$, for model optimization.
-      
+
   - $`\sigma`$ denotes the sigmoid function.
 
   - $`\beta`$ is a hyperparameter that balances the influence of negative feedback.
@@ -384,23 +384,23 @@ The following metrics are used to evaluate the performance of the model:
 - **Precision@K**:
 
   $`Precision@K = \frac{1}{K} \sum_{i=1}^{K} \text{relevance}(i)`$
-  
+
   where $`\text{relevance}(i)`$ is an indicator of the relevance of the $`i`$-th item in the list.
 
 - **Recall@K**:
-  
+
   $`Recall@K = \frac{\sum_{i=1}^{K} \text{relevance}(i)}{\text{Total Relevant Items}}`$
 
 - **NDCG@K (Normalized Discounted Cumulative Gain)**:
   $`
   NDCG@K = \frac{DCG@K}{IDCG@K}, \quad DCG@K = \sum_{i=1}^{K} \frac{\text{relevance}(i)}{\log_2(i+1)}`$
-  
+
   where $`IDCG@K`$ is the ideal cumulative gain.
 
 - **AUC (Area Under Curve)**:
 
   $`AUC = \frac{1}{|P||N|} \sum_{p \in P} \sum_{n \in N} \mathbb{I}(s_p > s_n)`$
-  
+
   where $`P`$ and $`N`$ are sets of positive and negative examples, $`s_p`$ and $`s_n`$ are their scores.
 
 ---
@@ -412,7 +412,7 @@ Given the specifics of the data and business tasks, the validation scheme is con
 - **Data Splitting**:
   70% of the data is used for training, 15% for validation, and 15% for testing, employing a temporal split due to the presence of timestamps.
 
-- **K-fold Cross-Validation**:
+- **Time-Series Validation**:
   The data is divided into \(K\) folds, each taking turns being the validation set while the others form the training set. This is used for hyperparameter tuning.
 
 ---
@@ -459,3 +459,165 @@ In case of failure, return to Step 5 and formulate new hypotheses.
 This is the final stage where all results are summarized, and conclusions about the hypothesis and experiments are written.
 
 **MVP:** The article.
+
+### 3. Iteration of experiments & Baseline results
+
+The data selected for this study is extensive. The simplified KuaiRand dataset alone contains 1,000 users and 34 million items! Due to resource constraints at this point (a trial run for baseline comparison in our publication), we have decided to follow the lead of our scientific community colleagues and reduce the data, taking only the interactions that were used to launch the two solutions ([NFARec](https://ar5iv.labs.arxiv.org/html/2404.06900) and [SIGformer](https://arxiv.org/pdf/2404.11982)) that have been published so far, and two additional solutions are currently in the pipeline.
+Currently, two solutions, x and y, have been released, with two more expected soon.
+As of this moment, the following results have been obtained (subject to further updates):
+
+| Approach | Dataset | Recall@20 | Precision@20 | NDCG@20 |
+|----------|----------|----------|----------|----------|
+| [SIGformer](https://github.com/Laitielly/gnn-recommender/tree/sigformer) | KuaiRand | 0.15 | 0.015 | 0.072  |
+| [SIGformer](https://github.com/Laitielly/gnn-recommender/tree/sigformer) | SberZvuk | 0.0014 | 0.02 | 0.023 |
+| [NFARec](https://github.com/WangXFng/NFARec) | KuaiRand | 0.008 | 0.21 | 0.21  |
+| [NFARec](https://github.com/WangXFng/NFARec) | SberZvuk | - | - | - |
+| [KGUF](https://github.com/sisinflab/KGUF) | KuaiRand | - | - | -  |
+| [KGUF](https://github.com/sisinflab/KGUF) | SberZvuk | - | - | - |
+| [MacGNN](https://github.com/YuanchenBei/MacGNN) | KuaiRand | - | - | -  |
+| [MacGNN](https://github.com/YuanchenBei/MacGNN) | SberZvuk | - | - | - |
+
+The next stage, after completing the launch of the baseline, is the implementation of our own hypothesis described above.
+
+**MVP:** branches with custom code and environment, completed table.
+
+### 4. Подготовка пилота
+
+#### 4.1. Pilot Evaluation Methodology
+
+##### Objective of the Experiment
+
+The primary objective is to evaluate the impact of incorporating explicit negative feedback on recommendation quality and resource utilization. The evaluation will be conducted using the following metrics:
+
+1. **Recommendation Quality Metrics:**
+   - Precision@k, Recall@k, NDCG@k (for model selection and publication purposes).
+
+2. **Business Metrics:**
+   - CPU and GPU requirements during inference.
+   - System response time.
+   - Memory consumption.
+
+##### Testing Methodology
+
+1. **Offline Evaluation:**
+   - **Purpose:** Use historical data to compare the baseline model with the proposed solution.
+   - **Approach:** Metrics will be compared on identical datasets with consistent preprocessing and training methodologies to ensure fairness and reproducibility.
+
+2. **Online Evaluation:**
+   - **Purpose:** Conduct A/B testing to observe the system’s performance in real-world conditions.
+
+##### Steps for Evaluation
+
+1. **Define Metrics:**
+   - Immediately after the A/B test, evaluate user complaints as a proxy metric.
+   - After 1-2 months (once annotation data is available), re-evaluate the primary business metrics.
+
+2. **Auxiliary Metrics:**
+   - Monitor metrics such as maintenance costs to ensure that the test proceeds as expected and does not adversely affect other areas.
+
+3. **Control Metrics:**
+   - Track indicators to identify potential issues or system anomalies (overflow).
+
+4. **Determine Business Impact:**
+   - Collaborate with business stakeholders to define the expected effects of the system (e.g., reduced computational costs, increased user engagement).
+   - Set the significance level and acceptable thresholds for Type II errors.
+
+5. **Group Allocation:**
+   - Allocate groups based on users behavour.
+   - Leverage existing A/B testing frameworks with single or double hashing methods to ensure proper segmentation.
+
+6. **Enhance Test Power:**
+   - Investigate opportunities to reduce data variance using techniques such as stratification, CUPED (Controlled Pre-Experiment Data), or other methods.
+
+7. **Determine Test Scope and Duration:**
+   - Estimate the required minimum detectable effect (MDE) and account for data seasonality.
+   - Define the necessary percentage of interactions and test duration.
+   - If the target metric demonstrates volatility, consider using non-standard tests that account for such variations.
+
+8. **Prepare Technical Infrastructure:**
+   - Establish the necessary infrastructure to support the A/B test.
+   - Conduct preliminary tests on historical data to validate error levels for Type I and Type II errors.
+
+By following this methodology, the pilot aims to provide a robust and comprehensive evaluation of the hypothesis, ensuring reliable insights and actionable outcomes.
+
+The cost calculation needs to be clarified.
+
+#### 4.2. Criteria for a Successful Pilot
+
+##### Research Perspective
+
+- Our solution outperforms the baseline on 2 out of 3 key metrics.
+- Compared to baselines, our model is, on average, 20% lighter and faster in inference.
+- The research paper is accepted for publication in the SCOPE journal.
+
+##### Business Effectiveness
+
+- Reduction in the number of user complaints regarding irrelevant recommendations.
+- Increased user engagement, reflected by a higher number of interactions.
+- Reduction of computational costs by 20% compared to the historical system.
+
+##### Control Metrics
+
+- No significant deterioration in system response time.
+- System stability is maintained.
+
+##### Additional Success Criteria
+
+- Return on investment (ROI) achieved within N months.
+- Establishment of a foundation for future scalability, including handling larger graphs and enabling online learning.
+
+##### A/B Testing Perspective
+
+- The target metric shows a statistically significant improvement.
+- Control metrics remain stable without any degradation.
+- Auxiliary metrics align with both the target metric and each other.
+
+##### Next Steps Based on Pilot Outcomes
+
+- **In Case of Success:** Proceed with system implementation.
+- **In Case of Failure:** Identify and correct issues, improve the model and system, explore alternative solutions, or decide to abandon the approach.
+
+Regardless of the pilot outcome, we collect analytics, generate new ideas and hypotheses, and preserve all results for future reference.
+
+#### 4.3. Assumed Pilot Scheme
+
+1. **Graph Neural Network (GNN):**
+   - Used to generate embeddings for users.
+   - Training is conducted offline using historical data.
+   - The resulting embeddings are stored and utilized by the ranking system.
+
+2. **User Interaction Logging:**
+   - The system continuously collects data on user actions (e.g., clicks, skips, likes, dislikes) during interactions.
+   - All user behaviors are logged in real-time for later analysis and model updates.
+
+3. **Ranking System (Ranker):**
+   - Operates in an online mode.
+   - Accepts user queries and relevant embeddings as inputs.
+   - Provides ranked recommendations based on current user preferences and the most recent data.
+
+4. **Incremental Learning for the Ranker:**
+   - Utilizes logged user behavior data to incrementally train the ranking model in real-time.
+   - The updated ranker immediately reflects changes in user preferences, enabling more accurate predictions for subsequent recommendations.
+
+5. **Integration of Negative Feedback:**
+   - Negative feedback is incorporated into the graph during its construction and stored in dedicated graph nodes.
+   - This information is also leveraged by the ranker to exclude undesirable items from recommendations in real-time.
+
+6. **Iterative Recommendation Cycle:**
+   - Recommendations are generated based on the current state of the ranker.
+   - User interactions with these recommendations are logged, providing a feedback loop.
+   - The logged data is used to retrain the ranker incrementally, ensuring continuous adaptation to user behavior.
+
+**Workflow Overview:**
+
+1. **Offline Phase:**
+   - Build the graph with user and item embeddings using GNN.
+   - Integrate historical user interactions and explicit&implicit feedback (positive and negative).
+
+2. **Online Phase:**
+   - Process user queries and generate recommendations using the ranker.
+   - Log user interactions in real-time.
+   - Update the ranker incrementally based on newly logged data.
+   - Generate updated recommendations using the retrained ranker.
+
+This iterative and adaptive process ensures the recommendation system remains responsive to dynamic user preferences while maintaining high accuracy and relevance.
