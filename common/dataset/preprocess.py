@@ -27,9 +27,9 @@ class CFData(object):
         inter_mat = list()
 
         lines = open(file_name, "r").readlines()
-        for l in lines:
-            tmps = l.strip()
-            inters = [int(i) for i in tmps.split(" ")]
+        for line in lines:
+            tmps = line.strip()
+            inters = [int(i) for i in tmps.split()]
 
             u_id, pos_ids = inters[0], inters[1:]
             pos_ids = list(set(pos_ids))
@@ -66,12 +66,8 @@ class CFData(object):
             n_id = max_id - min_id + 1
             return (min_id, max_id), n_id
 
-        self.user_range, self.n_users = _id_range(
-            self.train_data, self.test_data, idx=0
-        )
-        self.item_range, self.n_items = _id_range(
-            self.train_data, self.test_data, idx=1
-        )
+        self.user_range, self.n_users = _id_range(self.train_data, self.test_data, idx=0)
+        self.item_range, self.n_items = _id_range(self.train_data, self.test_data, idx=1)
         self.n_train = len(self.train_data)
         self.n_test = len(self.test_data)
 
@@ -150,13 +146,8 @@ class KGData(object):
         self.n_kg_triples = len(self.kg_data)
 
         print("-" * 50)
-        print(
-            "-   entity_range: (%d, %d)" % (self.entity_range[0], self.entity_range[1])
-        )
-        print(
-            "- relation_range: (%d, %d)"
-            % (self.relation_range[0], self.relation_range[1])
-        )
+        print("-   entity_range: (%d, %d)" % (self.entity_range[0], self.entity_range[1]))
+        print("- relation_range: (%d, %d)" % (self.relation_range[0], self.relation_range[1]))
         print("-     n_entities: %d" % self.n_entities)
         print("-    n_relations: %d" % self.n_relations)
         print("-   n_kg_triples: %d" % self.n_kg_triples)

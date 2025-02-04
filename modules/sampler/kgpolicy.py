@@ -3,9 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 import torch_geometric as geometric
-import networkx as nx
-
-from tqdm import tqdm
 
 
 class GraphConv(nn.Module):
@@ -54,9 +51,7 @@ class KGPolicy(nn.Module):
         self.n_entities = params["n_nodes"]
         self.item_range = params["item_range"]
         self.input_channel = in_channel
-        self.entity_embedding = self._initialize_weight(
-            self.n_entities, self.input_channel
-        )
+        self.entity_embedding = self._initialize_weight(self.n_entities, self.input_channel)
 
     def _initialize_weight(self, n_entities, input_channel):
         """entities includes items and other entities in knowledge graph"""
@@ -64,9 +59,7 @@ class KGPolicy(nn.Module):
             kg_embedding = self.params["kg_embedding"]
             entity_embedding = nn.Parameter(kg_embedding)
         else:
-            entity_embedding = nn.Parameter(
-                torch.FloatTensor(n_entities, input_channel[0])
-            )
+            entity_embedding = nn.Parameter(torch.FloatTensor(n_entities, input_channel[0]))
             nn.init.xavier_uniform_(entity_embedding)
 
         if self.config.freeze_s:
@@ -90,13 +83,9 @@ class KGPolicy(nn.Module):
             """sample candidate negative items based on knowledge graph"""
             one_hop, one_hop_logits = self.kg_step(pos, users, adj_matrix, step=1)
 
-            candidate_neg, two_hop_logits = self.kg_step(
-                one_hop, users, adj_matrix, step=2
-            )
+            candidate_neg, two_hop_logits = self.kg_step(one_hop, users, adj_matrix, step=2)
             candidate_neg = self.filter_entity(candidate_neg, self.item_range)
-            good_neg, good_logits = self.prune_step(
-                self.dis, candidate_neg, users, two_hop_logits
-            )
+            good_neg, good_logits = self.prune_step(self.dis, candidate_neg, users, two_hop_logits)
             good_logits = good_logits + one_hop_logits
 
             neg_list = torch.cat([neg_list, good_neg.unsqueeze(0)])
@@ -119,6 +108,8 @@ class KGPolicy(nn.Module):
             .flatten()
         )
         neighbor_index = edge_matrix.flatten()
+        node_index = node_index.long()
+        neighbor_index = neighbor_index.long()
         edges = torch.cat((node_index.unsqueeze(1), neighbor_index.unsqueeze(1)), dim=1)
         return edges
 
@@ -132,11 +123,11 @@ class KGPolicy(nn.Module):
         """use knowledge embedding to decide candidate negative items"""
         u_e = gcn_embedding[user]
         u_e = u_e.unsqueeze(dim=2)
-        pos_e = gcn_embedding[pos]
+        pos_e = gcn_embedding[pos.long()]
         pos_e = pos_e.unsqueeze(dim=1)
 
-        one_hop = adj_matrix[pos]
-        i_e = gcn_embedding[one_hop]
+        one_hop = adj_matrix[pos.long()]
+        i_e = gcn_embedding[one_hop.long()]
 
         p_entity = F.leaky_relu(pos_e * i_e)
         p = torch.matmul(p_entity, u_e)
@@ -177,6 +168,7 @@ class KGPolicy(nn.Module):
 
     @staticmethod
     def filter_entity(neg, item_range):
+        neg = neg.long()
         random_neg = torch.randint(
             int(item_range[0]), int(item_range[1] + 1), neg.size(), device=neg.device
         )

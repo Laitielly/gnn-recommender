@@ -1,10 +1,6 @@
 import numpy as np
-import torch
 from torch.utils.data import Dataset
 import random
-import scipy.sparse as sp
-
-from time import time
 
 
 class TrainGenerator(Dataset):

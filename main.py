@@ -32,7 +32,6 @@ def train_one_epoch(
     cur_epoch,
     avg_reward,
 ):
-
     loss, base_loss, reg_loss = 0, 0, 0
     epoch_reward = 0
 
@@ -40,7 +39,6 @@ def train_one_epoch(
     tbar = tqdm(train_loader, ascii=True)
     num_batch = len(train_loader)
     for batch_data in tbar:
-
         tbar.set_description("Epoch {}".format(cur_epoch))
 
         if torch.cuda.is_available():
@@ -57,9 +55,7 @@ def train_one_epoch(
         selected_neg_items = selected_neg_items_list[-1, :]
 
         train_set = train_data[users]
-        in_train = torch.sum(
-            selected_neg_items.unsqueeze(1) == train_set.long(), dim=1
-        ).byte()
+        in_train = torch.sum(selected_neg_items.unsqueeze(1) == train_set.long(), dim=1).byte()
         selected_neg_items[in_train] = neg[in_train]
 
         base_loss_batch, reg_loss_batch = recommender(users, pos, selected_neg_items)
@@ -176,11 +172,7 @@ def train(train_loader, test_loader, graph, data_config, args_config):
     train_data = build_train_data(train_mat)
 
     if args_config.pretrain_r:
-        print(
-            "\nLoad model from {}".format(
-                args_config.data_path + args_config.model_path
-            )
-        )
+        print("\nLoad model from {}".format(args_config.data_path + args_config.model_path))
         paras = torch.load(args_config.data_path + args_config.model_path)
         all_embed = torch.cat((paras["user_para"], paras["item_para"]))
         data_config["all_embed"] = all_embed

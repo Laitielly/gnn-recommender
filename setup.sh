@@ -1,8 +1,8 @@
 #!/bin/bash
 # ----------------------------------------------------
-# 
+#
 # This script is to initiate Environment for KGPolicy
-# Dependency including 
+# Dependency including
 # - python=3.6
 # - torch=1.1.0
 # - torch_geometric=1.3.0
@@ -14,7 +14,7 @@
 MAJOR=$(python -c 'import sys; print(sys.version_info.major)')
 MINOR=$(python -c 'import sys; print(sys.version_info.minor)')
 echo ${green}[INFO] "System python version: "${green}$(python -c 'import sys; print(sys.version)')
-if [ $MAJOR != "3" ] 
+if [ $MAJOR != "3" ]
 then
     echo "${red}[ERROR] We require python==3.6..."
     echo [EXIT]

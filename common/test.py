@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 
 def get_score(model, n_users, n_items, train_user_dict, s, t):
-    u_e, i_e = torch.split(model.all_embed, [n_users, n_items])
+    u_e, i_e = torch.split(model.all_embed, [n_users, model.all_embed.size(0) - n_users])
 
     u_e = u_e[s:t, :]
 
@@ -13,7 +13,7 @@ def get_score(model, n_users, n_items, train_user_dict, s, t):
     for u in range(s, t):
         pos = train_user_dict[u]
         idx = pos.index(-1) if -1 in pos else len(pos)
-        score_matrix[u-s][pos[:idx] - n_users] = -1e5
+        score_matrix[u - s][pos[:idx] - n_users] = -1e5
 
     return score_matrix
 

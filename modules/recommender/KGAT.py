@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import math
 
 import torch_geometric as geometric
 
@@ -124,7 +123,7 @@ class KGAT(nn.Module):
         return reward
 
     def _l2_loss(self, t):
-        return torch.sum(t ** 2) / 2
+        return torch.sum(t**2) / 2
 
     def inference(self, users):
         num_entity = self.n_nodes - self.n_users - self.n_items
@@ -147,6 +146,4 @@ class KGAT(nn.Module):
         return ranking
 
     def __str__(self):
-        return "recommender using KGAT, embedding size {}".format(
-            self.args_config.emb_size
-        )
+        return "recommender using KGAT, embedding size {}".format(self.args_config.emb_size)
