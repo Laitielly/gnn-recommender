@@ -115,7 +115,9 @@ class Dataset(object):
         ui_adj = sp.csr_matrix(ui_adj)
         print("Computing adj matrix ...")
         ui_adj = torch.tensor(
-            self.normalize_graph_mat(ui_adj).toarray(), dtype=torch.float32, device="cuda:0"
+            self.normalize_graph_mat(ui_adj).toarray(),
+            dtype=torch.float32,
+            device="cuda:0",
         )  # device='cuda:0'
         return ui_adj
 

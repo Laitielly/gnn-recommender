@@ -47,7 +47,8 @@ class Encoder(nn.Module):
         (adj_matrix, cor_matrix) = matrices
         # get individual adj
         local_cor = torch.zeros(
-            (event_type.size(0), event_type.size(1), event_type.size(1)), device="cuda:0"
+            (event_type.size(0), event_type.size(1), event_type.size(1)),
+            device="cuda:0",
         )  # , device='cuda:0'
         for i, e in enumerate(event_type):
             # the slicing operation
@@ -157,7 +158,14 @@ class Predictor(nn.Module):
 
 class Model(nn.Module):
     def __init__(
-        self, num_types, d_model=256, n_layers=4, n_head=4, dropout=0.1, device=0, opt=None
+        self,
+        num_types,
+        d_model=256,
+        n_layers=4,
+        n_head=4,
+        dropout=0.1,
+        device=0,
+        opt=None,
     ):
         super(Model, self).__init__()
 
@@ -165,7 +173,11 @@ class Model(nn.Module):
         # self.user_emb = nn.Embedding(C.USER_NUMBER, d_model, padding_idx=C.PAD)  # dding 0
 
         self.encoder = Encoder(
-            num_types=num_types, d_model=d_model, n_layers=n_layers, n_head=n_head, dropout=dropout
+            num_types=num_types,
+            d_model=d_model,
+            n_layers=n_layers,
+            n_head=n_head,
+            dropout=dropout,
         )
         self.num_types = num_types
 

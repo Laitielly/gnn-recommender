@@ -108,7 +108,11 @@ def train(model, data, optimizer, scheduler, opt):
             "\r(Test)  P@k:{pre},    R@k:{rec}, \n"
             "(Test)map@k:{map_}, ndcg@k:{ndcg}, "
             "elapse:{elapse:3.3f} min".format(
-                elapse=(time.time() - start) / 60, pre=pre, rec=rec, map_=map_, ndcg=ndcg
+                elapse=(time.time() - start) / 60,
+                pre=pre,
+                rec=rec,
+                map_=map_,
+                ndcg=ndcg,
             )
         )
         # print('\r(Test) R@k:{rec}, ndcg@k:{ndcg}, '

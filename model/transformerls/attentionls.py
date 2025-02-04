@@ -37,7 +37,13 @@ class AttentionLSEncoder(nn.Module):
     def get_tiles(self, x, transpose=False):
         # x: bsz x n_heads x seqlen x d_head
         bsz, n_heads, seqlen, d_h = x.shape
-        out_shape = (bsz, n_heads, seqlen // self.window_size - 1, 2 * self.window_size, d_h)
+        out_shape = (
+            bsz,
+            n_heads,
+            seqlen // self.window_size - 1,
+            2 * self.window_size,
+            d_h,
+        )
         in_strides = x.stride()
         out_strides = (
             in_strides[0],

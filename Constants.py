@@ -4,7 +4,15 @@ print("k:", Ks)
 
 DATASET = "Zvuk"
 ENCODER = "THP"  # NHP THP Transformer
-ABLATIONs = {"w/oWeSch", "w/oPopDe", "w/oSA", "w/oNorm", "w/oUSpec", "w/oHgcn", "w/oDisen"}
+ABLATIONs = {
+    "w/oWeSch",
+    "w/oPopDe",
+    "w/oSA",
+    "w/oNorm",
+    "w/oUSpec",
+    "w/oHgcn",
+    "w/oDisen",
+}
 ABLATION = "Full"
 
 user_dict = {

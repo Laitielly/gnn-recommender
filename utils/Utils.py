@@ -14,7 +14,8 @@ def get_non_pad_mask(seq):
 
 def get_non_pad_mask_for_matrix(seq):
     mask = torch.matmul(
-        seq.ne(C.PAD).type(torch.float).unsqueeze(2), seq.ne(C.PAD).type(torch.float).unsqueeze(1)
+        seq.ne(C.PAD).type(torch.float).unsqueeze(2),
+        seq.ne(C.PAD).type(torch.float).unsqueeze(1),
     )
     return mask != 0
 
@@ -116,7 +117,10 @@ def type_loss(prediction, label, test_label, opt):
         label.size(0), C.ITEM_NUMBER, dtype=torch.float32, device="cuda:0"
     )  # device='cuda:0',
     for i, (t, tl) in enumerate(zip(label, test_label)):
-        multi_hots[i][t[t != 0] - 1], multi_hots[i][tl[tl != 0] - 1] = opt.beta, opt.lambda_
+        multi_hots[i][t[t != 0] - 1], multi_hots[i][tl[tl != 0] - 1] = (
+            opt.beta,
+            opt.lambda_,
+        )
 
     log_prb = F.logsigmoid(prediction)
     multi_hots = multi_hots * (1 - opt.smooth) + (1 - multi_hots) * opt.smooth / C.ITEM_NUMBER

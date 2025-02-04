@@ -2,7 +2,10 @@ import polars as pl
 
 file_path = "Zvuk/Zvuk_train.txt"
 data = pl.read_csv(
-    file_path, separator=" ", has_header=False, new_columns=["user_id", "item_id", "feedback"]
+    file_path,
+    separator=" ",
+    has_header=False,
+    new_columns=["user_id", "item_id", "feedback"],
 )
 
 
