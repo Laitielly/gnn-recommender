@@ -186,7 +186,7 @@ def main(trial):
 
     print("[Info] parameters: {}".format(opt))
     num_types = C.ITEM_NUMBER
-    num_user = C.USER_NUMBER
+    # num_user = C.USER_NUMBER
 
     """ prepare model """
     model = Model(

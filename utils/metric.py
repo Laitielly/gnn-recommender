@@ -35,12 +35,14 @@ def precision_recall_ndcg_at_k(k, rankedlist, test_matrix):
 def vaild(prediction, label, top_n, pre, rec, map_, ndcg):
     top_ = torch.topk(prediction, top_n, -1, sorted=True)[1]
     recom_lists = []
-    for top, l in zip(top_, label):
+    for top, label_item in zip(top_, label):
         try:
-            l = l[l != 0] - 1
+            label_item = label_item[label_item != 0] - 1
         except Exception:
-            l = l[l != 0]  # the IDs of some datasets start from 1, instead of 0
-        recom_list, ground_list = top.cpu().numpy(), l.cpu().numpy()
+            label_item = label_item[
+                label_item != 0
+            ]  # the IDs of some datasets start from 1, instead of 0
+        recom_list, ground_list = top.cpu().numpy(), label_item.cpu().numpy()
         recom_lists.append(recom_list)
         if len(ground_list) == 0:
             continue

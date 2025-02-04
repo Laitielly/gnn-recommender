@@ -2,6 +2,7 @@ import Constants as C
 import numpy as np
 import torch
 import sys
+import time
 
 sys.path.append("..")
 
@@ -45,9 +46,6 @@ def read_interaction():
 
     np.save(directory_path + "adjacency_matrix.npy", adjacency_matrix.cpu().numpy())
     np.save(directory_path + "correlation_matrix.npy", correlation_matrix.cpu().numpy())
-
-
-import time
 
 
 def main():

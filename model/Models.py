@@ -1,7 +1,8 @@
 import torch.nn as nn
-from utils.Utils import *
+from utils.Utils import get_non_pad_mask, get_subsequent_mask, get_attn_key_pad_mask
 import Constants as C
 import torch.nn
+import torch.nn.functional as F
 from utils import Utils
 from model.THP.THP import THPEncoder
 from model.HGC.HGC import HGCEncoder
@@ -9,7 +10,7 @@ from model.transformer.Layers import EncoderLayer
 
 
 class Encoder(nn.Module):
-    def __init__(self, num_types, d_model, n_layers, n_head, dropout):
+    def __init__(self, d_model, n_layers, n_head, dropout):  # , num_types
         super().__init__()
         self.d_model = d_model
 

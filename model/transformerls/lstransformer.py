@@ -1,4 +1,9 @@
-from model.transformerls.attentionls import *
+import torch
+import torch.nn as nn
+
+# import torch.nn.functional as F
+# import math
+from model.transformerls.attentionls import AttentionLSEncoder
 
 
 class TransformerLS(nn.Module):

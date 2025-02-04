@@ -37,8 +37,12 @@ class MultiHeadAttention(nn.Module):
 
     # def forward(self, q, k, v, geo_, mask=None):
     def forward(self, q, k, v, mask=None):
-        d_k, d_v, n_head = self.d_k, self.d_v, self.n_head
-        sz_b, len_q, len_k, len_v = q.size(0), q.size(1), k.size(1), v.size(1)
+        # d_k, d_v, n_head = self.d_k, self.d_v, self.n_head
+        # len_k, len_v = k.size(1), v.size(1)
+        sz_b, len_q = (
+            q.size(0),
+            q.size(1),
+        )
 
         residual = v
         q, k, v = self.layer_norm(q), self.layer_norm(k), self.layer_norm(v)
