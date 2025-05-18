@@ -3,6 +3,9 @@ import networkx as nx
 from pyvis.network import Network
 import tempfile
 import os
+import random
+
+random.seed(228)
 
 def generate_mock_user_item_graph(num_users=20, num_items=30, edge_prob=0.1):
     G = nx.Graph()
@@ -14,7 +17,7 @@ def generate_mock_user_item_graph(num_users=20, num_items=30, edge_prob=0.1):
 
     for u in users:
         for i in items:
-            if nx.utils.uniform(0, 1) < edge_prob:
+            if random.uniform(0, 1) < edge_prob:
                 G.add_edge(u, i)
     return G
 
